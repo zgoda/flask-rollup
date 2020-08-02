@@ -80,4 +80,7 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Build Tools',
     ],
+    entrypoints={
+        'rollup=flask_rollup.cli:rollup_grp',
+    },
 )
