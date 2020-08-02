@@ -111,6 +111,3 @@ _venv
 # lol
 node_modules/
 package-lock.json
-
-# web artifacts
-**/static/sitemap.xml
