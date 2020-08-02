@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Flask-Rollup'
-copyright = '2020, Jarek Zgoda'
+copyright = '2020, Jarek Zgoda'  # noqa: A001
 author = 'Jarek Zgoda'
 
 # The full version, including alpha/beta/rc tags
