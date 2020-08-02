@@ -2,6 +2,7 @@ import shlex
 import subprocess
 
 import click
+from flask import current_app
 from flask.cli import with_appcontext
 
 
@@ -59,3 +60,14 @@ export default (async () => ({
     with open('rollup.config.js', 'w') as fp:
         fp.write(rollup_config)
     click.echo('All done, Rollup installation is ready')
+
+
+@rollup_grp.command(name='run')
+@with_appcontext
+def rollup_run_cmd():
+    """Run rollup and generate all registered bundles"""
+    rollup = current_app.extensions['rollup']
+    for name in rollup.bundles.keys():
+        click.echo(f'Building bundle {name}')
+        rollup.run_rollup(name)
+    click.echo('All done')

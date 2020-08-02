@@ -136,7 +136,7 @@ class Bundle:
         """
         rv = ['-d', self.target_dir]
         for ep in self.entrypoints:
-            rv.extend(ep.cmdline_param())
+            rv.append(ep.cmdline_param())
         return rv
 
     def resolve_output(self, root: str, url_path: str):
@@ -202,6 +202,8 @@ class Rollup:
             bundle = self.bundles[name]
             return bundle.output.url
 
+        app.extensions['rollup'] = self
+
     def register(self, bundle: Bundle):
         """Register bundle. At this moment input paths are resolved.
 
@@ -222,7 +224,7 @@ class Rollup:
         new_state = bundle.calc_state()
         if bundle.state != new_state:
             argv = self.argv.copy()
-            argv.append(bundle.argv())
+            argv.extend(bundle.argv())
             environ = os.environ.copy()
             environ['NODE_ENV'] = environ['FLASK_ENV']
             kw = {}
