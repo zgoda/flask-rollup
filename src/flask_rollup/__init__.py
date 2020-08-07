@@ -68,7 +68,7 @@ class Bundle:
 
     In simplest case of single entrypoint it may be specified as string denoting path
     relative to app static folder. In any case bundle can have only one unnamed
-    entrypoint and this condition is validated during bundle registration.
+    entrypoint and this condition is validated early in the process.
 
     Args:
         name: name of the bundle
@@ -88,20 +88,22 @@ class Bundle:
 
     def __post_init__(self):
         entrypoints = []
-        found = 0
+        unnamed = 0
         for ep in self.entrypoints:
             if isinstance(ep, str):
-                if found > 0:
+                if unnamed > 0:
                     raise BundleDefinitionError('Simple entrypoint already defined')
                 entrypoints.append(Entrypoint(path=ep, name=self.name))
-                found += 1
+                unnamed += 1
                 continue
             if not ep.name:
-                if found > 0:
+                if unnamed > 0:
                     raise BundleDefinitionError('Simple entrypoint already defined')
                 ep.name = self.name
                 entrypoints.append(ep)
-                found += 1
+                unnamed += 1
+            else:
+                entrypoints.append(ep)
         self.entrypoints = entrypoints
 
     def resolve_paths(self, root: str):
@@ -214,7 +216,7 @@ class Rollup:
         bundle.resolve_paths(self.static_folder)
 
     def run_rollup(self, bundle_name: str):
-        """Run Rollup bundler over specified bundle is bundle state changed. Once
+        """Run Rollup bundler over specified bundle if bundle state changed. Once
         Rollup finishes bundle's output is resolved (paths and url).
 
         Args:
