@@ -21,12 +21,15 @@ The goal is to integrate Rollup as Javascript bundler with Flask application dev
 .. _Rollup: https://rollupjs.org/
 .. _Flask: https://palletsprojects.com/p/flask/
 
+Dependencies
+------------
+
+NodeJS 10 (with ``npm``), Python 3.7 and Flask 1.1. We're modern.
+
 Installation
 ------------
 
 *TBD*
-
-Since Rollup is Javascript package, installation of NodeJS is required for operation. Specifically, recent versions of Rollup require NodeJS version 10.0 or newer.
 
 Basic usage
 -----------
@@ -47,11 +50,11 @@ After installing Flask-Rollup in Python virtual environment, an environment for 
       init  Initialise Rollup environment
       run   Run Rollup and generate all registered bundles
 
-Running ``flask rollup init`` will create bare bones Javascript project control file ``package.json``, install Rollup and all required plugins and finally create generic Rolup configuration file ``rollup.config.js``. All these artifacts are generated in current working directory so these commands may be safely tested outside application code tree.
+Running ``flask rollup init`` will create bare bones Javascript project control file ``package.json``, install Rollup and all required plugins and finally create generic Rolup configuration file in ``rollup.config.js``. All these artifacts are generated in current working directory so these commands may be safely tested outside application code tree.
 
 Once initialisation is done, the extension does not modify anything in Javascript environment so all updates to packages have to be processed *the Javascript way* (eg. with ``npm i --save-dev rollup-plugin-something-fancy``).
 
-With Javascript environment ready Rollup can begin bundling Javascript code of the application. Internally definition expressed as instance of :class:`Bundle` is translated into series of Rollup command line params. Simplest bundle definition can look the below code.
+With Javascript environment ready Rollup can begin bundling Javascript code of the application. Internally definition expressed as instance of :class:`Bundle` is translated into series of Rollup command line params. Simplest bundle definition can look like the below code.
 
 .. code-block:: python
 
@@ -81,7 +84,7 @@ Advanced usage patterns
 Local Javascript code dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If Javascript code uses local dependencies (eg imported from local module) Rollup will properly pick up modifications to both entrypoint and to imported code. Unfortunately Flask-Rollup does not analyse Javascript code and has to be provided with static list of local dependencies to be able to determine state of bundle while in development mode (whether it's *dirty* and needs to be regenerated or did not change). :class:`Bundle` takes ``dependencies`` argument which is a list of paths (still relative to static directory) to be considered a dependency when calculating bundle state.
+If Javascript code uses local dependencies (eg imported from local module), Rollup will properly pick up modifications to both entrypoint and to imported code. Unfortunately Flask-Rollup does not analyse Javascript code and has to be provided with static list of local dependencies to be able to determine state of bundle while in development mode (whether it's *dirty* and needs to be regenerated or did not change). :class:`Bundle` takes ``dependencies`` argument which is a list of paths (still relative to static directory) to be considered a dependency when calculating bundle state.
 
 Multiple entrypoints
 ^^^^^^^^^^^^^^^^^^^^
