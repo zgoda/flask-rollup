@@ -27,6 +27,11 @@ test_reqs = [
 ]
 
 
+docs_reqs = [
+    'Sphinx'
+]
+
+
 dev_reqs = [
     'ipdb',
     'flake8',
@@ -42,7 +47,7 @@ dev_reqs = [
     'wheel',
     'flask-shell-ipython',
     'watchdog',
-] + test_reqs
+] + test_reqs + docs_reqs
 
 
 setup(
@@ -63,6 +68,7 @@ setup(
     ],
     extras_require={
         'test': test_reqs,
+        'docs': docs_reqs,
         'dev': dev_reqs,
     },
     python_requires='~=3.7',
