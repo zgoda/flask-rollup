@@ -33,7 +33,7 @@ jobs:
         pip install -U -e .[test] --upgrade-strategy eager --use-feature=2020-resolver
     - name: Test with pytest
       run: |
-        pytest --cov-branch --cov-report xml --cov devlog tests
+        pytest --cov-branch --cov-report xml --cov flask_rollup tests
     - name: Test package build
       run: |
         python setup.py sdist bdist_wheel
