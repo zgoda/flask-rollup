@@ -1,6 +1,9 @@
 Flask-Rollup
 ============
 
+.. image:: https://github.com/zgoda/flask-rollup/workflows/Tests/badge.svg
+    :target: https://github.com/zgoda/flask-rollup/actions?query=workflow%3ATests
+
 .. image:: https://coveralls.io/repos/github/zgoda/flask-rollup/badge.svg?branch=master
     :target: https://coveralls.io/github/zgoda/flask-rollup?branch=master
 
