@@ -91,6 +91,17 @@ Once bundle is registered it may be generated with ``flask rollup run``. For con
 
 .. _Terser: https://terser.org/
 
+Extension configuration
+-----------------------
+
+This extension uses following configuration options.
+
+``ROLLUP_PATH``
+    path to ``rollup`` executable, if not provided it will be assumed it's available in system search path as ``rollup``
+
+``ROLLUP_CONFIG_JS``
+    path to ``rollup.config.js`` file with Rollup configuration, it has to be provided for running web application and may be omitted for CLI operations, it will be assumed this file is present in current working directory
+
 Rollup bundling configuration
 -----------------------------
 

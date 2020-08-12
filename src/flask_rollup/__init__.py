@@ -120,7 +120,7 @@ class Bundle:
 
     def calc_state(self) -> str:
         """Calculate bundle state checksum. This is used to determine if bundle should
-        be rebuild in development mode. For each input path (entrypoints and
+        be rebuilt in development mode. For each input path (entrypoints and
         dependencies) file modification time is used as a base of calculation.
 
         Returns:
@@ -160,7 +160,7 @@ class Bundle:
 @dataclass
 class Rollup:
     """Rollup integration with Flask. Extension can be registered in both simple way
-    and using application factory and ``init_app(app)`` pattern.
+    or with ``init_app(app)`` pattern.
     """
     app: Optional[Flask] = None
     bundles: Mapping[str, Bundle] = field(default_factory=dict, init=False)
