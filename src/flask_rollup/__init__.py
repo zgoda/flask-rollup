@@ -8,7 +8,7 @@ from typing import List, Mapping, Optional, Union
 
 from flask import Flask, request
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 
 def resolve_path(*parts) -> str:  # pragma: no cover
