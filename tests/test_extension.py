@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from flask import url_for
 
 from flask_rollup import Bundle, Rollup
 
@@ -32,10 +33,69 @@ def test_autobuild_enabled_in_development(app, mocker):
     assert len(app.before_request_funcs) == 1
 
 
+def test_autobuild_running_in_development(app, mocker):
+    def handler():
+        return 'something'
+    app.config['SERVER_NAME'] = '127.0.0.1'
+    name = 'p1'
+    mocker.patch.dict('os.environ', {'FLASK_ENV': 'development'})
+    rollup = Rollup(app)
+    b = Bundle(name, 'some/where', ['some/input/file.js'])
+    rollup.register(b)
+    app.add_url_rule('/something', endpoint=name, view_func=handler)
+    fake_run = mocker.Mock()
+    mocker.patch.object(rollup, 'run_rollup', fake_run)
+    with app.test_client() as client:
+        with app.app_context():
+            url = url_for(name)
+        client.get(url)
+    fake_run.assert_called_once_with(name)
+
+
+def test_autobuild_skipped_for_other_endpoint(app, mocker):
+    def handler():
+        return 'something'
+    app.config['SERVER_NAME'] = '127.0.0.1'
+    name = 'p1'
+    other_name = 'p2'
+    mocker.patch.dict('os.environ', {'FLASK_ENV': 'development'})
+    rollup = Rollup(app)
+    b = Bundle(name, 'some/where', ['some/input/file.js'])
+    rollup.register(b)
+    app.add_url_rule('/something', endpoint=name, view_func=handler)
+    app.add_url_rule('/otherthing', endpoint=other_name, view_func=handler)
+    fake_run = mocker.Mock()
+    mocker.patch.object(rollup, 'run_rollup', fake_run)
+    with app.test_client() as client:
+        with app.app_context():
+            url = url_for(other_name)
+        client.get(url)
+    fake_run.assert_not_called()
+
+
 def test_autobuild_disabled_in_production(app, mocker):
     mocker.patch.dict('os.environ', {'FLASK_ENV': 'production'})
     Rollup(app)
     assert len(app.before_request_funcs) == 0
+
+
+def test_autobuild_not_running_in_production(app, mocker):
+    def handler():
+        return 'something'
+    app.config['SERVER_NAME'] = '127.0.0.1'
+    name = 'p1'
+    mocker.patch.dict('os.environ', {'FLASK_ENV': 'production'})
+    rollup = Rollup(app)
+    b = Bundle(name, 'some/where', ['some/input/file.js'])
+    rollup.register(b)
+    app.add_url_rule('/something', endpoint=name, view_func=handler)
+    fake_run = mocker.Mock()
+    mocker.patch.object(rollup, 'run_rollup', fake_run)
+    with app.test_client() as client:
+        with app.app_context():
+            url = url_for(name)
+        client.get(url)
+    fake_run.assert_not_called()
 
 
 def test_register(app):
