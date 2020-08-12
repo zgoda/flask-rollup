@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from flask_rollup import Bundle, Rollup
 
 
@@ -42,3 +44,20 @@ def test_register(app):
     rollup.register(b)
     assert len(rollup.bundles) == 1
     assert os.path.isabs(b.target_dir)
+
+
+@pytest.mark.parametrize('environment', ['development', 'production'])
+def test_run(environment, app, mocker):
+    name = 'p1'
+    mocker.patch.dict('os.environ', {'FLASK_ENV': environment})
+    b = Bundle(name, 'some/where', ['some/input/file.js'])
+    rollup = Rollup(app)
+    rollup.register(b)
+    fake_run = mocker.Mock()
+    mocker.patch('flask_rollup.subprocess.run', fake_run)
+    mocker.patch(
+        'flask_rollup.os.stat', mocker.Mock(return_value=mocker.Mock(st_mtime_ns=100))
+    )
+    rollup.run_rollup(name)
+    rollup.run_rollup(name)
+    fake_run.assert_called_once()

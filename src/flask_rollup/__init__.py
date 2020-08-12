@@ -228,7 +228,7 @@ class Rollup:
             argv = self.argv.copy()
             argv.extend(bundle.argv())
             environ = os.environ.copy()
-            environ['NODE_ENV'] = environ['FLASK_ENV']
+            environ['NODE_ENV'] = environ.get('FLASK_ENV', 'production')
             kw = {}
             if not self.mode_production:
                 kw.update({
