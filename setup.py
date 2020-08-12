@@ -73,7 +73,7 @@ setup(
     },
     python_requires='~=3.7',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Plugins',
         'Environment :: Web Environment',
         'Framework :: Flask',

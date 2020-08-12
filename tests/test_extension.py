@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from flask import url_for
+from flask import url_for, render_template_string
 
 from flask_rollup import Bundle, Rollup
 
@@ -121,3 +121,26 @@ def test_run(environment, app, mocker):
     rollup.run_rollup(name)
     rollup.run_rollup(name)
     fake_run.assert_called_once()
+
+
+def test_template_global(app, mocker):
+    def handler():
+        return render_template_string('{{ jsbundle(request.endpoint) }}')
+    app.config['SERVER_NAME'] = '127.0.0.1'
+    name = 'p1'
+    b = Bundle(name, 'some/where', ['some/input/file.js'])
+    mocker.patch.object(b, 'calc_state', mocker.Mock(return_value='state'))
+    rollup = Rollup(app)
+    rollup.register(b)
+    app.add_url_rule('/something', endpoint=name, view_func=handler)
+    mocker.patch('flask_rollup.subprocess.run', mocker.Mock())
+    tgt_path = '/static/directory/some/where/file1.js'
+    mocker.patch(
+        'flask_rollup.glob.glob', mocker.Mock(return_value=[tgt_path])
+    )
+    rollup.run_rollup(name)
+    with app.test_client() as client:
+        with app.app_context():
+            url = url_for(name)
+        rv = client.get(url)
+        assert b.output.url.encode('utf-8') in rv.data
