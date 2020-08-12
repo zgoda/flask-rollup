@@ -92,4 +92,9 @@ setup(
             'rollup=flask_rollup.cli:rollup_grp',
         ]
     },
+    project_urls={
+        'Documentation': 'https://flask-rollup.readthedocs.io/',
+        'Source': 'https://github.com/zgoda/flask-rollup',
+        'Issues': 'https://github.com/zgoda/flask-rollup/issues',
+    },
 )
