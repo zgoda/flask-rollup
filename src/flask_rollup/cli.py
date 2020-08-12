@@ -7,7 +7,7 @@ from flask.cli import with_appcontext
 
 
 @click.group(name='rollup')
-def rollup_grp():
+def rollup_grp():  # pragma: no cover
     """Rollup commands
     """
     pass

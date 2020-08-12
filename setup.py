@@ -23,6 +23,7 @@ def find_version(*where):
 test_reqs = [
     'pytest',
     'pytest-cov',
+    'pytest-mock',
 ]
 
 

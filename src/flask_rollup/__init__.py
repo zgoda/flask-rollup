@@ -11,7 +11,7 @@ from flask import Flask, request
 __version__ = '0.0.1'
 
 
-def resolve_path(*parts) -> str:
+def resolve_path(*parts) -> str:  # pragma: no cover
     """Join path parts and normalise resulting path.
 
     Returns:
@@ -127,7 +127,7 @@ class Bundle:
             str: bundle state checksum
         """
         src = [str(os.stat(ep.path).st_mtime_ns) for ep in self.entrypoints]
-        src.extend([str(os.stat(d.path).st_mtime_ns) for d in self.dependencies])
+        src.extend([str(os.stat(d).st_mtime_ns) for d in self.dependencies])
         return hashlib.sha256('\n'.join(src).encode('utf-8')).hexdigest()
 
     def argv(self) -> List[str]:
