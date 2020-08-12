@@ -121,7 +121,7 @@ class Bundle:
     def calc_state(self) -> str:
         """Calculate bundle state checksum. This is used to determine if bundle should
         be rebuild in development mode. For each input path (entrypoints and
-        dependencies) file mtime is used as a base of calculation.
+        dependencies) file modification time is used as a base of calculation.
 
         Returns:
             str: bundle state checksum
@@ -207,13 +207,15 @@ class Rollup:
         app.extensions['rollup'] = self
 
     def register(self, bundle: Bundle):
-        """Register bundle. At this moment input paths are resolved.
+        """Register bundle. At this moment input paths are resolved. If any
+        output matching file is present, the bundle output is also resolved.
 
         Args:
             bundle: bundle object to be registered
         """
         self.bundles[bundle.name] = bundle
         bundle.resolve_paths(self.static_folder)
+        bundle.resolve_output(self.static_folder, self.static_url_path)
 
     def run_rollup(self, bundle_name: str):
         """Run Rollup bundler over specified bundle if bundle state changed. Once
@@ -236,5 +238,5 @@ class Rollup:
                     'stderr': subprocess.DEVNULL,
                 })
             subprocess.run(argv, check=True, env=environ, **kw)
-            bundle.resolve_output(self.static_folder, self.static_url_path)
             bundle.state = new_state
+        bundle.resolve_output(self.static_folder, self.static_url_path)

@@ -1,4 +1,4 @@
-.. currentmodule:: flask_rollup
+.. module:: flask_rollup
 
 Flask-Rollup
 ============
@@ -73,9 +73,28 @@ With Javascript environment ready Rollup can begin bundling Javascript code of t
         entrypoints=['js/auth.login.js']
     )
 
-This definition will produce ES6 module ``dist/js/auth.login.[hash].js`` and source map file ``dist/js/auth.login.[hash].js.map`` - all these paths are relative to application static folder path. The module will include all code that was imported from installed modules thanks to included plugin that resolves imports from NodeJS location (``node_modules`` directory). In production mode the bundle code will be minified.
+Both entrypoint and target paths are relative to application static folder. The above definition will produce ES6 module ``dist/js/auth.login.[hash].js`` and source map file ``dist/js/auth.login.[hash].js.map``. The module will include all code that was imported from installed modules thanks to preconfigured plugin that resolves imports from NodeJS location (``node_modules`` directory). In production mode the bundle code will also be minified with `Terser`_.
 
-The distinction between values coming from Rollup configuration and command line is clear:
+If entrypoints Javascript code depends on any other module that's not installed, it should be listed in bundle's ``dependencies`` list. Rollup bundles this code without any issues, but in Python the module content is not parsed so all such dependencies have to be specified manually. This is important only in development mode, when bundles are automatically rebuilt upon code changes.
+
+.. code-block:: python
+
+    from flask_rollup import Bundle
+
+    bundle = Bundle(
+        name='auth.login', target_dir='dist/js',
+        entrypoints=['js/auth.login.js'],
+        dependencies=['js/utils.js', 'js/security.js'],
+    )
+
+Once bundle is registered it may be generated with ``flask rollup run``. For convenience in development mode bundles are built automatically if there are any changes to its entrypoints or dependencies.
+
+.. _Terser: https://terser.org/
+
+Rollup bundling configuration
+-----------------------------
+
+Initialisation function produces generic Rollup config file ``rollup.config.js`` which in most cases is sufficient but may be modified to specific needs. The distinction between values coming from Rollup configuration and command line should be kept as follows:
 
 * command line options tell Rollup *what to do*
 * configuration tells Rollup *how to do it*
@@ -84,7 +103,37 @@ The distinction between values coming from Rollup configuration and command line
 
     Modifications to ``rollup.config.js`` should take into consideration how Rollup processes configuration and command line - the options are **not** overwritten but merged instead. Including bundle parameters like entrypoints or paths in ``rollup.config.js`` may produce undesirable side effects.
 
-Bundle instance then needs to be registered with extension object and once that's done the bundle may be generated with ``flask rollup run``.
+Template function
+-----------------
+
+This extension registers global template function ``jsbundle`` that takes bundle name as an argument and returns bundle url to be included in Jinja2 template. In particular, it can be used in Javascript code like below.
+
+.. code-block:: html+jinja
+
+    {% block scripts %}
+    <script type="module">
+        import { html, render, Dashboard } from '{{ jsbundle(request.endpoint) }}';
+        render(
+            html`<${Dashboard} />`,
+            document.getElementById('dashboard-block'),
+        );
+    </script>
+    {% endblock %}
+
+To make this work, bundles should be named after route endpoints where they are supposed to be included.
+
+API Documentation
+-----------------
+
+.. autoclass:: Rollup
+    :members:
+
+.. autoclass:: Bundle
+    :members:
+
+.. autoclass:: Entrypoint
+    :members:
+
 
 Advanced usage patterns
 -----------------------
@@ -97,11 +146,11 @@ If Javascript code uses local dependencies (eg imported from local modules, as o
 Multiple entrypoints
 ^^^^^^^^^^^^^^^^^^^^
 
-Specify multiple entrypoints to get chunked output. This is not very usable for code splitting (which with some convention may be easily implemented on Python/Flask side) but for example to conditionally include some debug code. If the bundle should produce chunked output, ``entrypoints`` param to :class:`Bundle` constructor can include more elements. These elements may be :class:`Entrypoint` instances or plain strings but the rule is that only one of them may be unnamed (string entrypoint elements are unnamed by its nature).
+Specify multiple entrypoints to get chunked output. This is not always usable for code splitting (which with some convention may be easily implemented on Python/Flask side) but for example to conditionally include some debug code. If the bundle should produce chunked output, ``entrypoints`` param to :class:`Bundle` constructor can include more elements. These elements may be :class:`Entrypoint` instances or plain strings but the rule is that only one of them may be unnamed (string entrypoint elements are unnamed by its nature). Generated chunks will have names of respective entrypoints.
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
 
 
 
