@@ -29,7 +29,15 @@ NodeJS 10 (with ``npm``), Python 3.7 and Flask 1.1. We're modern.
 Installation
 ------------
 
-*TBD*
+Use pip to install officially released version from PyPI.
+
+.. code-block:: shell-session
+
+    $ pip install -U flask-rollup
+
+It does not matter how NodeJS has been installed, it just needs to be available in system search path along with ``npm``. If unsure use either system provided ones (Ubuntu 20.04: NodeJS 10.19.0 and npm 6.14.4) or use `nvm tool`_ to install locally any arbitrary version.
+
+.. _nvm tool: https://github.com/nvm-sh/nvm
 
 Basic usage
 -----------
@@ -84,7 +92,7 @@ Advanced usage patterns
 Local Javascript code dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If Javascript code uses local dependencies (eg imported from local module), Rollup will properly pick up modifications to both entrypoint and to imported code. Unfortunately Flask-Rollup does not analyse Javascript code and has to be provided with static list of local dependencies to be able to determine state of bundle while in development mode (whether it's *dirty* and needs to be regenerated or did not change). :class:`Bundle` takes ``dependencies`` argument which is a list of paths (still relative to static directory) to be considered a dependency when calculating bundle state.
+If Javascript code uses local dependencies (eg imported from local modules, as opposed to installed libraries), Rollup will properly pick up modifications to both entrypoint and to imported code. Unfortunately Flask-Rollup does not analyse Javascript code and has to be provided with static list of local dependencies to be able to determine state of bundle while in development mode (whether it's *dirty* and needs to be regenerated or did not change). :class:`Bundle` takes ``dependencies`` argument which is a list of paths (still - relative to static directory) to be considered a dependency when calculating bundle state.
 
 Multiple entrypoints
 ^^^^^^^^^^^^^^^^^^^^
