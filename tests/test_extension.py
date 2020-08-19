@@ -41,6 +41,10 @@ def test_autobuild_running_in_development(app, mocker):
     mocker.patch.dict('os.environ', {'FLASK_ENV': 'development'})
     rollup = Rollup(app)
     b = Bundle(name, 'some/where', ['some/input/file.js'])
+    mocker.patch(
+        'flask_rollup.os.stat', mocker.Mock(return_value=mocker.Mock(st_mtime_ns=200))
+    )
+    mocker.patch('flask_rollup.subprocess.run')
     rollup.register(b)
     app.add_url_rule('/something', endpoint=name, view_func=handler)
     fake_run = mocker.Mock()
@@ -61,6 +65,10 @@ def test_autobuild_skipped_for_other_endpoint(app, mocker):
     mocker.patch.dict('os.environ', {'FLASK_ENV': 'development'})
     rollup = Rollup(app)
     b = Bundle(name, 'some/where', ['some/input/file.js'])
+    mocker.patch(
+        'flask_rollup.os.stat', mocker.Mock(return_value=mocker.Mock(st_mtime_ns=200))
+    )
+    mocker.patch('flask_rollup.subprocess.run')
     rollup.register(b)
     app.add_url_rule('/something', endpoint=name, view_func=handler)
     app.add_url_rule('/otherthing', endpoint=other_name, view_func=handler)
@@ -112,12 +120,12 @@ def test_run(environment, app, mocker):
     mocker.patch.dict('os.environ', {'FLASK_ENV': environment})
     b = Bundle(name, 'some/where', ['some/input/file.js'])
     rollup = Rollup(app)
-    rollup.register(b)
     fake_run = mocker.Mock()
     mocker.patch('flask_rollup.subprocess.run', fake_run)
     mocker.patch(
         'flask_rollup.os.stat', mocker.Mock(return_value=mocker.Mock(st_mtime_ns=100))
     )
+    rollup.register(b)
     rollup.run_rollup(name)
     rollup.run_rollup(name)
     fake_run.assert_called_once()
@@ -131,16 +139,37 @@ def test_template_global(app, mocker):
     b = Bundle(name, 'some/where', ['some/input/file.js'])
     mocker.patch.object(b, 'calc_state', mocker.Mock(return_value='state'))
     rollup = Rollup(app)
-    rollup.register(b)
-    app.add_url_rule('/something', endpoint=name, view_func=handler)
-    mocker.patch('flask_rollup.subprocess.run', mocker.Mock())
+    mocker.patch('flask_rollup.subprocess.run')
     tgt_path = '/static/directory/some/where/file1.js'
     mocker.patch(
         'flask_rollup.glob.glob', mocker.Mock(return_value=[tgt_path])
     )
+    rollup.register(b)
+    app.add_url_rule('/something', endpoint=name, view_func=handler)
+    mocker.patch('flask_rollup.os.remove')
     rollup.run_rollup(name)
     with app.test_client() as client:
         with app.app_context():
             url = url_for(name)
         rv = client.get(url)
         assert b.output.url.encode('utf-8') in rv.data
+
+
+def test_template_global_fail_on_prod(app, mocker):
+    def handler():
+        return render_template_string('{{ jsbundle(request.endpoint) }}')
+    mocker.patch.dict('os.environ', {'FLASK_ENV': 'production'})
+    app.config['SERVER_NAME'] = '127.0.0.1'
+    name = 'p1'
+    b = Bundle(name, 'some/where', ['some/input/file.js'])
+    rollup = Rollup(app)
+    mocker.patch(
+        'flask_rollup.glob.glob', mocker.Mock(return_value=[])
+    )
+    rollup.register(b)
+    app.add_url_rule('/something', endpoint=name, view_func=handler)
+    with app.test_client() as client:
+        with app.app_context():
+            url = url_for(name)
+        rv = client.get(url)
+        assert rv.status_code == 500

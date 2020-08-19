@@ -8,7 +8,7 @@ from typing import List, Mapping, Optional, Union
 
 from flask import Flask, request
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 
 
 def resolve_path(*parts) -> str:  # pragma: no cover
@@ -141,6 +141,12 @@ class Bundle:
             rv.append(ep.cmdline_param())
         return rv
 
+    def clean_artifacts(self):
+        """Delete bundle artifacts (Javascript and maps).
+        """
+        for path in glob.glob(f'{self.target_dir}/{self.name}.*.js*'):
+            os.remove(path)
+
     def resolve_output(self, root: str, url_path: str):
         """Determine bundle's generation output paths (both absolute file system path
         and relative to static folder) and url.
@@ -149,7 +155,7 @@ class Bundle:
             root: static content root directory (application static folder)
             url_path: path to static content
         """
-        files = glob.glob(f'{root}/**/{self.name}.*.js')
+        files = glob.glob(f'{self.target_dir}/{self.name}.*.js')
         if len(files) == 1:
             output_path = files[0]
             path = output_path.replace(f'{root}/', '')
@@ -202,13 +208,16 @@ class Rollup:
         @app.template_global(name='jsbundle')
         def template_func(name: str):
             bundle = self.bundles[name]
-            return bundle.output.url
+            if bundle.output:
+                return bundle.output.url
+            raise RuntimeError(f'Bundle {name} not generated')
 
         app.extensions['rollup'] = self
 
     def register(self, bundle: Bundle):
         """Register bundle. At this moment input paths are resolved. If any
-        output matching file is present, the bundle output is also resolved.
+        output matching file is present, the bundle output is resolved with
+        short circuit, generated otherwise.
 
         Args:
             bundle: bundle object to be registered
@@ -216,6 +225,8 @@ class Rollup:
         self.bundles[bundle.name] = bundle
         bundle.resolve_paths(self.static_folder)
         bundle.resolve_output(self.static_folder, self.static_url_path)
+        if not self.mode_production and bundle.output is None:
+            self.run_rollup(bundle.name)
 
     def run_rollup(self, bundle_name: str):
         """Run Rollup bundler over specified bundle if bundle state changed. Once
@@ -227,6 +238,7 @@ class Rollup:
         bundle = self.bundles[bundle_name]
         new_state = bundle.calc_state()
         if bundle.state != new_state:
+            bundle.clean_artifacts()
             argv = self.argv.copy()
             argv.extend(bundle.argv())
             environ = os.environ.copy()
