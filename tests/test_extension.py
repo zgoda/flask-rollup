@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from flask import url_for, render_template_string
+from flask import render_template_string, url_for
 
 from flask_rollup import Bundle, Rollup
 

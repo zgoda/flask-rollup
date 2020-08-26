@@ -1,7 +1,7 @@
-import re
-import codecs
-from os import path
 import ast
+import codecs
+import re
+from os import path
 
 from setuptools import find_packages, setup
 
