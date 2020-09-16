@@ -60,9 +60,9 @@ After installing Flask-Rollup in Python virtual environment, an environment for 
 
 Running ``flask rollup init`` will create bare bones Javascript project control file ``package.json``, install Rollup and all required plugins and finally create generic Rolup configuration file in ``rollup.config.js``. All these artifacts are generated in current working directory so these commands may be safely tested outside application code tree.
 
-Once initialisation is done, the extension does not modify anything in Javascript environment so all updates to packages have to be processed *the Javascript way* (eg. with ``npm i --save-dev rollup-plugin-something-fancy``).
+Once initialisation is done, the extension does not modify anything in Javascript environment so all updates to packages have to be processed *the Javascript way* (eg. with ``npm i -D rollup-plugin-something-fancy`` and then adding it to Rollup pipeline in ``rollup.config.js``).
 
-With Javascript environment ready Rollup can begin bundling Javascript code of the application. Internally definition expressed as instance of :class:`Bundle` is translated into series of Rollup command line params. Simplest bundle definition can look like the below code.
+With Javascript environment ready Rollup can start bundling Javascript code of the application. Internally definition expressed as instance of :class:`Bundle` is translated into series of Rollup command line params. Simplest bundle definition can look like the below code.
 
 .. code-block:: python
 
@@ -75,7 +75,7 @@ With Javascript environment ready Rollup can begin bundling Javascript code of t
 
 Both entrypoint and target paths are relative to application static folder. The above definition will produce ES6 module ``dist/js/auth.login.[hash].js`` and source map file ``dist/js/auth.login.[hash].js.map``. The module will include all code that was imported from installed modules thanks to preconfigured plugin that resolves imports from NodeJS location (``node_modules`` directory). In production mode the bundle code will also be minified with `Terser`_.
 
-If entrypoints Javascript code depends on any other module that's not installed, it should be listed in bundle's ``dependencies`` list. Rollup bundles this code without any issues, but in Python the module content is not parsed so all such dependencies have to be specified manually. This is important only in development mode, when bundles are automatically rebuilt upon code changes.
+If entrypoints Javascript code depends on any other module that's not installed, it should be listed in bundle's ``dependencies`` list. Rollup bundles this code without any issues, but in Python the module content is not parsed so all such dependencies have to be specified manually so the bundle gets rebuilt once they change. This is important only in development mode when bundles are automatically rebuilt upon code changes.
 
 .. code-block:: python
 
@@ -157,7 +157,7 @@ If Javascript code uses local dependencies (eg imported from local modules, as o
 Multiple entrypoints
 ^^^^^^^^^^^^^^^^^^^^
 
-Specify multiple entrypoints to get chunked output. This is not always usable for code splitting (which with some convention may be easily implemented on Python/Flask side) but for example to conditionally include some debug code. If the bundle should produce chunked output, ``entrypoints`` param to :class:`Bundle` constructor can include more elements. These elements may be :class:`Entrypoint` instances or plain strings but the rule is that only one of them may be unnamed (string entrypoint elements are unnamed by its nature). Generated chunks will have names of respective entrypoints.
+Specify multiple entrypoints to get chunked output. This is not always usable for code splitting (which with the above mentioned convention of naming bundles after Flask view endpoints may be easily implemented on Python side) but for example to conditionally include some debug code. If the bundle should produce chunked output, ``entrypoints`` param to :class:`Bundle` constructor can include more elements. These elements may be :class:`Entrypoint` instances or plain strings but the rule is that only one of them may be unnamed (string entrypoint elements are unnamed by its nature). Generated chunks will have names of respective entrypoints.
 
 .. toctree::
     :maxdepth: 2
