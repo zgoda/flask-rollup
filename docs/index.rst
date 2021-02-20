@@ -60,6 +60,8 @@ After installing Flask-Rollup in Python virtual environment, an environment for 
 
 Running ``flask rollup init`` will create bare bones Javascript project control file ``package.json``, install Rollup and all required plugins and finally create generic Rolup configuration file in ``rollup.config.js``. All these artifacts are generated in current working directory so these commands may be safely tested outside application code tree.
 
+``init`` command takes optional flag ``--babel`` which signals if `Babel transpiler`_ should also be installed along with other plugins. This is important if you want your Javascript code to be transpiled down to ES6 and allows you to write it using features from any newer published version, like object spread operator from ES9. With this option enabled, a bare bones Babel configuration file will be written as ``babel.config.json``. This configuration will include only options related to transpilation to target version so you can freely modify it.
+
 Once initialisation is done, the extension does not modify anything in Javascript environment so all updates to packages have to be processed *the Javascript way* (eg. with ``npm i -D rollup-plugin-something-fancy`` and then adding it to Rollup pipeline in ``rollup.config.js``).
 
 With Javascript environment ready Rollup can start bundling Javascript code of the application. Internally definition expressed as instance of :class:`Bundle` is translated into series of Rollup command line params. Simplest bundle definition can look like the below code.
@@ -75,7 +77,7 @@ With Javascript environment ready Rollup can start bundling Javascript code of t
 
 Both entrypoint and target paths are relative to application static folder. The above definition will produce ES6 module ``dist/js/auth.login.[hash].js`` and source map file ``dist/js/auth.login.[hash].js.map``. The module will include all code that was imported from installed modules thanks to preconfigured plugin that resolves imports from NodeJS location (``node_modules`` directory). In production mode the bundle code will also be minified with `Terser`_.
 
-If entrypoints Javascript code depends on any other module that's not installed, it should be listed in bundle's ``dependencies`` list. Rollup bundles this code without any issues, but in Python the module content is not parsed so all such dependencies have to be specified manually so the bundle gets rebuilt once they change. This is important only in development mode when bundles are automatically rebuilt upon code changes.
+If entrypoints Javascript code depends on any other module that's not installed in ``node_modules``, it should be listed in bundle's ``dependencies`` list. Rollup bundles this code without any issues, but in Python the module content is not parsed so all such dependencies have to be specified manually so the bundle gets rebuilt once they change. This is important only in development mode when bundles are automatically rebuilt upon code changes.
 
 .. code-block:: python
 
@@ -90,6 +92,7 @@ If entrypoints Javascript code depends on any other module that's not installed,
 Once bundle is registered it may be generated with ``flask rollup run``. For convenience in development mode bundles are built automatically if there are any changes to its entrypoints or dependencies.
 
 .. _Terser: https://terser.org/
+.. _Babel transpiler: https://babeljs.io/
 
 Extension configuration
 -----------------------
@@ -105,14 +108,14 @@ This extension uses following configuration options.
 Rollup bundling configuration
 -----------------------------
 
-Initialisation function produces generic Rollup config file ``rollup.config.js`` which in most cases is sufficient but may be modified to specific needs. The distinction between values coming from Rollup configuration and command line should be kept as follows:
+Initialisation function produces generic Rollup config file ``rollup.config.js`` which in most cases is sufficient but may be modified to specific needs. Since the extension controls Rollup command line, the only way to change Rollup behaviour is with this configuration file. The distinction between values coming from Rollup configuration and command line should be kept strict and resolved as follows:
 
-* command line options tell Rollup *what to do*
-* configuration tells Rollup *how to do it*
+* command line options tell Rollup *what to do* (what input files to process)
+* configuration tells Rollup *how to do it* (how to process input files)
 
 .. note::
 
-    Modifications to ``rollup.config.js`` should take into consideration how Rollup processes configuration and command line - the options are **not** overwritten but merged instead. Including bundle parameters like entrypoints or paths in ``rollup.config.js`` may produce undesirable side effects.
+    Modifications to ``rollup.config.js`` should take into consideration how Rollup processes configuration and command line - the options are **not** overwritten but merged instead. Including bundle parameters like entrypoints or paths in ``rollup.config.js`` (iow *what to do*) may produce undesirable side effects.
 
 Template function
 -----------------
