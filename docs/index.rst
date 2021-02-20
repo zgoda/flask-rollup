@@ -42,7 +42,7 @@ It does not matter how NodeJS has been installed, it just needs to be available 
 Basic usage
 -----------
 
-After installing Flask-Rollup in Python virtual environment, an environment for Rollup has to be initialised. This extension adds CLI command group ``rollup`` and one of provided commands initialise all Javascript tooling for Rollup.
+After installing Flask-Rollup in Python virtual environment an environment for Rollup has to be initialised. This extension adds CLI command group ``rollup`` and one of provided commands initialise all Javascript tooling for Rollup.
 
 .. code-block:: shell-session
 
@@ -58,9 +58,9 @@ After installing Flask-Rollup in Python virtual environment, an environment for 
       init  Initialise Rollup environment
       run   Run Rollup and generate all registered bundles
 
-Running ``flask rollup init`` will create bare bones Javascript project control file ``package.json``, install Rollup and all required plugins and finally create generic Rolup configuration file in ``rollup.config.js``. All these artifacts are generated in current working directory so these commands may be safely tested outside application code tree.
+Running ``flask rollup init`` will create bare bones Javascript project control file ``package.json``, install Rollup and all required plugins and finally create generic Rollup configuration file in ``rollup.config.js``. All these artifacts are generated in current working directory so these commands may be safely tested outside of application code tree.
 
-``init`` command takes optional flag ``--babel`` which signals if `Babel transpiler`_ should also be installed along with other plugins. This is important if you want your Javascript code to be transpiled down to ES6 and allows you to write it using features from any newer published version, like object spread operator from ES9. With this option enabled, a bare bones Babel configuration file will be written as ``babel.config.json``. This configuration will include only options related to transpilation to target version so you can freely modify it.
+``init`` command takes optional flag ``--babel`` which signals if `Babel transpiler`_ should also be installed along with related plugins. This is important if you want your Javascript code to be transpiled down to ES6 and allows you to write it using features from any newer or experimental ES version, like `spread operator for object literals`_ from ES9 that's still marked as *experimental* with `CanIUse`_. With this option enabled, a bare bones Babel configuration file will be written as ``babel.config.json``. This configuration will include only options related to transpilation to target ES version so you can freely modify it to include other Babel options.
 
 Once initialisation is done, the extension does not modify anything in Javascript environment so all updates to packages have to be processed *the Javascript way* (eg. with ``npm i -D rollup-plugin-something-fancy`` and then adding it to Rollup pipeline in ``rollup.config.js``).
 
@@ -93,6 +93,15 @@ Once bundle is registered it may be generated with ``flask rollup run``. For con
 
 .. _Terser: https://terser.org/
 .. _Babel transpiler: https://babeljs.io/
+.. _spread operator for object literals: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax#spread_in_object_literals
+.. _CanIUse: https://caniuse.com/mdn-javascript_operators_spread_spread_in_destructuring
+
+Production vs development mode
+------------------------------
+
+The operation of Rollup with regards to environment is controlled by Flask environment variable ``FLASK_ENV``. It's automatically set by Flask but may be also controlled with startup scripts or `python-dotenv`_ package. This variable is directly translated to ``NODE_ENV`` and to ``process.environment`` in Javascript code in consequence.
+
+.. _python-dotenv: https://pypi.org/project/python-dotenv/
 
 Extension configuration
 -----------------------
@@ -103,7 +112,7 @@ This extension uses following configuration options.
     path to ``rollup`` executable, if not provided it will be assumed it's available in system search path as ``rollup``
 
 ``ROLLUP_CONFIG_JS``
-    path to ``rollup.config.js`` file with Rollup configuration, it has to be provided for running web application and may be omitted for CLI operations, it will be assumed this file is present in current working directory
+    path to ``rollup.config.js`` file with Rollup configuration, it has to be provided for running web application and may be omitted for CLI operations, it will be assumed this file is present in current working directory; this must be set when in ``production`` mode
 
 Rollup bundling configuration
 -----------------------------
@@ -116,6 +125,12 @@ Initialisation function produces generic Rollup config file ``rollup.config.js``
 .. note::
 
     Modifications to ``rollup.config.js`` should take into consideration how Rollup processes configuration and command line - the options are **not** overwritten but merged instead. Including bundle parameters like entrypoints or paths in ``rollup.config.js`` (iow *what to do*) may produce undesirable side effects.
+
+The *what to do* part is controlled by bundle definitions in your code.
+
+Be aware that processing additional (non-Javascript) files is neither natively supported by Rollup or this extension. In other words, if you think you can make Rollup (or Flask-Rollup) to process your SCSS or PostCSS modules then you better stop. It's not intended to do that. Use `Flask-Assets`_.
+
+.. _Flask-Assets: https://pypi.org/project/Flask-Assets/
 
 Template function
 -----------------
