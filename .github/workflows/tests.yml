@@ -28,9 +28,8 @@ jobs:
         key: pip|${{ matrix.python-version }}|${{ hashFiles('setup.py') }}
     - name: Install dependencies
       run: |
-        python -m pip install -U pip --upgrade-strategy eager
-        python -m pip install -U wheel --upgrade-strategy eager --use-feature=2020-resolver
-        pip install -U -e .[test] --upgrade-strategy eager --use-feature=2020-resolver
+        python -m pip install -U pip wheel --upgrade-strategy eager
+        pip install -U -e .[test] --upgrade-strategy eager
     - name: Test with pytest
       run: |
         pytest --cov-branch --cov-report xml --cov flask_rollup tests
@@ -40,8 +39,8 @@ jobs:
     - name: Coveralls report
       if: matrix.python-version == 3.8
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        python -m pip install -U coveralls
-        coveralls -v
+        python -m pip install -U PyYAML coveralls
+        coveralls -v --service=github-actions
