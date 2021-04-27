@@ -19,3 +19,9 @@ Links
 Copyright (c) 2020, Jarek Zgoda.
 
 Distributed under terms of 3-Clause New (or Revised) BSD license. See file LICENSE in top level directory for exact terms.
+
+---
+
+Edits by afinetooth:
+
+- Some minor change to README to trigger new build.
