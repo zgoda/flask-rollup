@@ -38,6 +38,10 @@ class BundleDefinitionError(RollupBundlerError):
 @dataclass
 class Entrypoint:
     """Entrypoint information: path and name.
+
+    Args:
+        path: entrypoint path
+        name: name of entrypoint, defaults to empty string
     """
     path: str
     name: str = ''
