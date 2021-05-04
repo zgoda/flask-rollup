@@ -28,17 +28,19 @@ jobs:
         key: pip|${{ matrix.python-version }}|${{ hashFiles('setup.py') }}
     - name: Install dependencies
       run: |
-        python -m pip install -U pip wheel --upgrade-strategy eager
-        pip install -U -e .[test] --upgrade-strategy eager
+        python -m pip install -U pip wheel
+        pip install -U -e .[test]
     - name: Test with pytest
       run: |
-        pytest --cov-branch --cov-report xml:coverage.xml --cov flask_rollup tests
+        pytest --cov-branch --cov-report xml --cov flask_rollup tests
     - name: Test package build
       run: |
         python setup.py sdist bdist_wheel
-    - name: Store coverage artifact
+    - name: Coveralls report
       if: matrix.python-version == 3.8
-      uses: actions/upload-artifact@v2.2.3
-      with:
-        name: coverage
-        path: ${{ github.workspace }}/coverage.xml
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        python -m pip install -U PyYAML coveralls
+        coveralls --service=github-actions
