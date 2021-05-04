@@ -40,5 +40,5 @@ jobs:
       if: matrix.python-version == 3.8
       uses: actions/upload-artifact@v2.2.3
       with:
-        name: coverage.xml
-        path: ${{ github.workspace }}
+        name: coverage
+        path: ${{ github.workspace }}/coverage.xml

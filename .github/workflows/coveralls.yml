@@ -14,7 +14,7 @@ jobs:
     - name: Download coverage results
       uses: actions/download-artifact@v2.0.9
       with:
-        name: coverage.xml
+        name: coverage
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
