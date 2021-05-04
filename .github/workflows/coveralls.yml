@@ -15,7 +15,6 @@ jobs:
       uses: dawidd6/action-download-artifact@v2.14.0
       with:
         workflow: Tests
-        name: coverage
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
