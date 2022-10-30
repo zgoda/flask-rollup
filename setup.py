@@ -63,7 +63,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'Flask>=1.1,<2.1'
+        'Flask>=1.1,<2.3'
     ],
     extras_require={
         'test': test_reqs,
